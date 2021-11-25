@@ -2,11 +2,11 @@ import numpy as np
 from scipy.fftpack import fft, ifft
 import matplotlib.pyplot as plt
 import wfdb
-import clean
+import filter
 
 
 def load_slp45():
-    eeg = wfdb.rdrecord("D:/WorkSpace/PyCharmProject/EEG_staging/psg_data/slp45", channels=[2]).p_signal.reshape(-1)
+    eeg = wfdb.rdrecord("D:/WorkSpace/PyCharmProject/EEG_staging/psg_data/slp01b", channels=[2]).p_signal.reshape(-1)
     return eeg
 
 
@@ -29,10 +29,8 @@ def show_data(sig):
     plt.plot(fr_half, amp_half)
     plt.show()
 
-    # 小波去噪信号
-    filter_eeg = clean.remove_high_fr(sig, 8, "db4")
-    filter_eeg = clean.wavelet_denoise(filter_eeg, 8, "db4")
-    print(filter_eeg[:50])
+    # 信号滤波
+    filter_eeg = filter.butter_low_trap_filter(sig, 0.5, 35, 250)
     plt.title("wavelet denoise signal")
     plt.plot(t, filter_eeg)
     plt.show()

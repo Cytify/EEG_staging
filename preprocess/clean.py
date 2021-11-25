@@ -1,7 +1,7 @@
 import math
 import pywt
 import numpy as np
-import wfdb
+from scipy import signal
 
 
 def wextend(x, len_ext):
@@ -17,7 +17,8 @@ def wextend(x, len_ext):
 
 
 def wconv1(x, f, shape):
-    return np.convolve(x, f, shape)
+    # return signal.convolve2d(np.array(x).reshape(1, len(x)), np.rot90(np.array(f).reshape(1, len(f)), 2), shape)
+    return signal.convolve2d(np.array(x).reshape(1, len(x)), np.array(f).reshape(1, len(f)), shape)
 
 
 def dwt(low_d, high_d, x):
@@ -29,13 +30,13 @@ def dwt(low_d, high_d, x):
 
     y = wextend(x, len_ext)
 
-    z = wconv1(y, low_d, "valid")
-    a = [z[i] for i in range(first, last, 2)]
-
     z = wconv1(y, high_d, "valid")
-    d = [z[i] for i in range(first, last, 2)]
+    a = [z[0][i] for i in range(first, last, 2)]
 
-    return [a, d]
+    z = wconv1(y, low_d, "valid")
+    d = [z[0][i] for i in range(first, last, 2)]
+
+    return [d, a]
     pass
 
 
@@ -72,7 +73,7 @@ def waverec(c, l, wavelet):
 
 
 def pywavedec(sig, n, wavelet):
-    wave = pywt.wavedec(sig, "db1", level=n)
+    wave = pywt.wavedec(sig, wavelet, level=n)
     c = []
     l = []
     for w in wave:
@@ -121,39 +122,6 @@ def wavelet_denoise(sig, n, wavelet):
     return denoise_sig
 
 
-def split_eeg(eeg, ann, sample):
-    stage_list = ["W", "1", "2", "3", "4", "R"]
-    data = []
-    sample[0] = 0
-    for index, value in enumerate(sample):
-        stage = ann[index].split(" ")[0].strip(b'\x00'.decode())
-        if stage not in stage_list:
-            continue
-        data.append([eeg[value:value + 7500], stage])
-
-    return data
-
-
-def load_data():
-    files = ["slp01a", "slp01b", "slp32", "slp41", "slp45", "slp59"]
-
-    # 数组存放格式
-    # data[filename][record],记录中[0]为原始信号，[1]为对应睡眠标记
-    data = {}
-    for file in files:
-        eeg = wfdb.rdrecord("D:/WorkSpace/PyCharmProject/EEG_staging/psg_data/" + file, channels=[2]).p_signal.reshape(
-            -1)
-        # 去除高频
-        eeg = remove_high_fr(eeg, 8, "db4")
-        # 小波阈值去噪
-        eeg = wavelet_denoise(eeg, 8, "db4")
-
-        ann = wfdb.rdann("D:/WorkSpace/PyCharmProject/EEG_staging/psg_data/" + file, "st")
-        data[file] = split_eeg(eeg, ann.aux_note, ann.sample)
-
-    return data
-
-
 def remove_high_fr(sig, n, wavelet):
     [ca8, cd8, cd7, cd6, cd5, cd4, cd3, cd2, cd1] = pywt.wavedec(sig, wavelet, level=n)
     ca8 = np.zeros(len(ca8))
@@ -163,28 +131,3 @@ def remove_high_fr(sig, n, wavelet):
     filted_data = pywt.waverec(coeffs, wavelet)
 
     return filted_data
-
-
-
-def waveletdec(self, s, coef_type='d', wname='sym7', level=6, mode='symmetric'):
-    import pywt
-    N = len(s)
-    w = pywt.Wavelet(wname)
-    a = s
-    ca = []
-    cd = []
-    for i in range(level):
-        (a, d) = pywt.dwt(a, w, mode)  # 将a作为输入进行dwt分解
-        ca.append(a)
-        cd.append(d)
-    rec_a = []
-    rec_d = []
-    for i, coeff in enumerate(ca):
-        coeff_list = [coeff, None] + [None] * i
-        rec_a.append(pywt.waverec(coeff_list, w)[0:N])  # 进行重构
-    for i, coeff in enumerate(cd):
-        coeff_list = [None, coeff] + [None] * i
-        rec_d.append(pywt.waverec(coeff_list, w)[0:N])  # 进行重构
-    if coef_type == 'd':
-        return rec_d
-    return rec_a

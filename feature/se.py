@@ -1,5 +1,5 @@
 import numpy as np
-from preprocess.clean import load_data
+from preprocess import data_load
 
 
 def sample_entropy(U, m, r):
@@ -30,15 +30,28 @@ def cal_se(eeg, interval):
 def se_analyse(data, interval):
     stage_se = {"W": [], "1": [], "2": [], "3": [], "4": [], "R": []}
     for file in data:
+        curr_stage = {"W": [], "1": [], "2": [], "3": [], "4": [], "R": []}
         for sig in data[file]:
             eeg = sig[0]
             stage = sig[1]
             se = cal_se(eeg, interval)
             stage_se[stage].append(se)
+            curr_stage[stage].append(se)
 
-    print(stage_se)
+        print("---------------- " + file + " situation ----------------")
+        for stage in curr_stage:
+            mean = np.mean(curr_stage[stage])
+            std = np.std(curr_stage[stage])
+            print(stage, "mean", mean, ", std", std)
+        print("\n")
+
+    print("---------------- total situation ----------------")
+    for stage in stage_se:
+        mean = np.mean(stage_se[stage])
+        std = np.std(stage_se[stage])
+        print(stage, "mean", mean, ", std", std)
 
 
 if __name__ == "__main__":
-    data = load_data()
+    data = data_load.load_data()
     se_analyse(data, 750)
