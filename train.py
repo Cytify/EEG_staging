@@ -3,7 +3,7 @@ from sklearn import tree
 from sklearn.model_selection import train_test_split,cross_val_score,cross_validate, KFold
 import pickle
 from preprocess import data_load
-from feature import amplitude, delta, pse, mse, se
+from feature import amplitude, energy_ratio, pse, mse, se
 
 
 def get_feature():
@@ -18,11 +18,15 @@ def get_feature():
 
             # amp = amplitude.amplitude(eeg)
             spectral_entropy = pse.spectral_entropy(eeg, 250)
-            delta_ratio = delta.delta_energy_ratio(eeg, 250)
+            delta_ratio = energy_ratio.energy_ratio(eeg, 250, 1, 4)
+            theta_ratio = energy_ratio.energy_ratio(eeg, 250, 4, 8)
+            alpha_ratio = energy_ratio.energy_ratio(eeg, 250, 8, 13)
+            beta_ratio = energy_ratio.energy_ratio(eeg, 250, 13, 30)
             sample_entropy = se.cal_se(eeg, 1500)
             multi_sample_entropy = mse.cal_mse(eeg, 7500, 11)
 
-            eeg_data.append([spectral_entropy, delta_ratio, sample_entropy, multi_sample_entropy])
+            eeg_data.append([spectral_entropy, delta_ratio, theta_ratio, alpha_ratio, beta_ratio,
+                             sample_entropy, multi_sample_entropy])
 
             eeg_target.append(label)
 
@@ -39,15 +43,19 @@ def decision_tree(data, target):
     # save_tree("tree.pickle", model)
 
     # 交叉验证划分训练集和测试集.test_size为测试集所占的比例
-    x_train, x_test, y_train, y_test = train_test_split(data, target, test_size=0.3, random_state=0)
+    x_train, x_test, y_train, y_test = train_test_split(data, target, test_size=0.4, random_state=0)
     print('训练集大小：', x_train.shape, y_train.shape)  # 训练集样本大小
     print('测试集大小：', x_test.shape, y_test.shape)  # 测试集样本大小
 
     print("model train start")
     model = tree.DecisionTreeClassifier(criterion="gini")
     model = model.fit(x_train, y_train)
+    score = model.score(x_test, y_test)
     print("model train end")
-    print('准确率：', model.score(x_test, y_test))  # 计算测试集的度量值（准确率）
+    print('准确率：', score)  # 计算测试集的度量值（准确率）
+
+    with open("score.txt", "a+") as f:
+        f.write(str(score) + "\n")
 
     print("save model")
     save_tree("tree.pickle", model)
@@ -67,7 +75,6 @@ def decision_tree(data, target):
     #     # y_test =
     #     print('train_index %s, test_index %s'%(train_index, test_index))
     #     break
-
 
 
 def save_tree(path, model):

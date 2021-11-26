@@ -54,4 +54,4 @@ def se_analyse(data, interval):
 
 if __name__ == "__main__":
     data = data_load.load_data()
-    se_analyse(data, 750)
+    se_analyse(data, 1500)
