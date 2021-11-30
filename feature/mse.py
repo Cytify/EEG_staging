@@ -9,7 +9,7 @@ def multiscale_entropy(data, m, t):
         sum = np.sum(data[i:i + t])
         coarse.append(sum / t * 1.0)
 
-    return se.sample_entropy(coarse, m, 0.2 * np.std(coarse, ddof=1))
+    return se.samp_entropy(coarse, m, 0.2 * np.std(coarse, ddof=1))
 
 
 def cal_mse(eeg, interval, t):

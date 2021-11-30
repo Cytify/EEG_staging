@@ -3,7 +3,10 @@ from sklearn import tree
 from sklearn.model_selection import train_test_split,cross_val_score,cross_validate, KFold
 import pickle
 from preprocess import data_load
-from feature import amplitude, energy_ratio, pse, mse, se
+from feature import amplitude, energy_ratio, pse, mse, se, hjorth, kc_complexity
+import sklearn.svm as svm
+import sklearn.ensemble as ensemble
+from sklearn.neural_network import MLPClassifier
 
 
 def get_feature():
@@ -12,6 +15,8 @@ def get_feature():
     eeg_target = []
     for file in data:
         print("current file:", file)
+        i=0
+        total=len(data[file])
         for seg in data[file]:
             eeg = seg[0]
             label = seg[1]
@@ -24,11 +29,17 @@ def get_feature():
             beta_ratio = energy_ratio.energy_ratio(eeg, 250, 13, 30)
             sample_entropy = se.cal_se(eeg, 1500)
             multi_sample_entropy = mse.cal_mse(eeg, 7500, 11)
+            [hjorth_mobility, hjorth_complexity] = hjorth.hjorth(eeg)
+            kc = kc_complexity.kc_complexity(eeg)
 
-            eeg_data.append([spectral_entropy, delta_ratio, theta_ratio, alpha_ratio, beta_ratio,
-                             sample_entropy, multi_sample_entropy])
+            eeg_data.append([spectral_entropy, delta_ratio, beta_ratio, hjorth_mobility, theta_ratio, alpha_ratio,
+                             sample_entropy, multi_sample_entropy, kc])
 
             eeg_target.append(label)
+            i+=1
+            if i%30==0:
+                print(str(round(i/total*100))+"%")
+
 
     return eeg_data, eeg_target
 
@@ -43,12 +54,18 @@ def decision_tree(data, target):
     # save_tree("tree.pickle", model)
 
     # 交叉验证划分训练集和测试集.test_size为测试集所占的比例
-    x_train, x_test, y_train, y_test = train_test_split(data, target, test_size=0.4, random_state=0)
+    x_train, x_test, y_train, y_test = train_test_split(data, target, test_size=0.3, random_state=0)
     print('训练集大小：', x_train.shape, y_train.shape)  # 训练集样本大小
     print('测试集大小：', x_test.shape, y_test.shape)  # 测试集样本大小
 
     print("model train start")
-    model = tree.DecisionTreeClassifier(criterion="gini")
+
+    # model = tree.DecisionTreeClassifier(criterion="gini")
+    # model = svm.SVC(kernel='linear')
+    # model = svm.SVC(kernel='poly', degree=3)
+    model = svm.SVC(kernel='rbf', C=600)
+    # model = ensemble.RandomForestClassifier()
+    # model = MLPClassifier(solver='lbfgs',alpha=1e-5,hidden_layer_sizes=(5,2),random_state=1)
     model = model.fit(x_train, y_train)
     score = model.score(x_test, y_test)
     print("model train end")

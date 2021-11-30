@@ -17,11 +17,11 @@ def split_eeg(eeg, ann, sample):
 
 
 def load_data():
-    # files = ["slp01a", "slp01b", "slp32", "slp41", "slp45", "slp59"]
-    files = []
-    with open("D:/WorkSpace/PyCharmProject/EEG_staging/psg_data/RECORDS", "r") as f:
-        for line in f.readlines():
-            files.append(line[:-1])
+    files = ["slp01a", "slp01b", "slp32", "slp41", "slp45", "slp59"]
+    # files = []
+    # with open("D:/WorkSpace/PyCharmProject/EEG_staging/psg_data/RECORDS", "r") as f:
+    #     for line in f.readlines():
+    #         files.append(line[:-1])
 
     # 数组存放格式
     # data[filename][record],记录中[0]为原始信号，[1]为对应睡眠标记
