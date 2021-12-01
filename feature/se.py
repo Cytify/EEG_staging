@@ -40,8 +40,8 @@ def samp_entropy(X, M, R):
     Cmp = np.logical_and(Dp <= R, InRange[:-1, :-1]).sum(axis=0)
 
     # Avoid taking log(0)
-    Samp_En = np.log(np.sum(Cm + 1e-100) / np.sum(Cmp + 1e-100))
 
+    Samp_En = np.log(np.sum(Cm + 1e-100) / np.sum(Cmp + 1e-100))
     return Samp_En
 
 # def sample_entropy(U, m, r):

@@ -58,5 +58,4 @@ def kc_analyse(data):
 
 if __name__ == "__main__":
     data = data_load.load_data()
-    # t的选择有多种，可以分析，论文中提出，t最好在11与12之间
     kc_analyse(data)

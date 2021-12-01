@@ -12,15 +12,18 @@ def multiscale_entropy(data, m, t):
     return se.samp_entropy(coarse, m, 0.2 * np.std(coarse, ddof=1))
 
 
+def samp_en(data, m, r):
+    return se.samp_entropy(data, m, r)
+
 def cal_mse(eeg, interval, t):
     i = 0
     group = []
     while i < 7500:
         group.append(eeg[i:i + interval])
         i += interval
-    se = [multiscale_entropy(seg, 2, t) for seg in group]
+    mse = [multiscale_entropy(seg, 2, t) for seg in group]
 
-    return np.mean(se)
+    return np.mean(mse)
 
 
 def mse_analyse(data, interval, t):
@@ -30,7 +33,7 @@ def mse_analyse(data, interval, t):
         for sig in data[file]:
             eeg = sig[0]
             stage = sig[1]
-            mse = cal_mse(eeg, interval, t)
+            mse = multiscale_entropy(eeg, 2, t)
             stage_mse[stage].append(mse)
             curr_stage[stage].append(mse)
 

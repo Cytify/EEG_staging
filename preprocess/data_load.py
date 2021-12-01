@@ -32,8 +32,8 @@ def load_data():
         # 滤波
         filter_eeg = filter.butter_low_trap_filter(eeg, 0.5, 35, 250)
         # z-score 标准化
-        filter_eeg = filter_eeg - np.mean(filter_eeg)
-        filter_eeg = filter_eeg / np.std(filter_eeg)
+        # filter_eeg = filter_eeg - np.mean(filter_eeg)
+        # filter_eeg = filter_eeg / np.std(filter_eeg)
 
         ann = wfdb.rdann("D:/WorkSpace/PyCharmProject/EEG_staging/psg_data/" + file, "st")
         data[file] = split_eeg(filter_eeg, ann.aux_note, ann.sample)

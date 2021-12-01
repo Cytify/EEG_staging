@@ -1,9 +1,9 @@
 import numpy as np
 from sklearn import tree
-from sklearn.model_selection import train_test_split,cross_val_score,cross_validate, KFold
+from sklearn.model_selection import train_test_split
 import pickle
-from preprocess import data_load
 from feature import amplitude, energy_ratio, pse, mse, se, hjorth, kc_complexity
+from preprocess import data_load
 import sklearn.svm as svm
 import sklearn.ensemble as ensemble
 from sklearn.neural_network import MLPClassifier
@@ -28,18 +28,20 @@ def get_feature():
             alpha_ratio = energy_ratio.energy_ratio(eeg, 250, 8, 13)
             beta_ratio = energy_ratio.energy_ratio(eeg, 250, 13, 30)
             sample_entropy = se.cal_se(eeg, 1500)
-            multi_sample_entropy = mse.cal_mse(eeg, 7500, 11)
+            # multi_sample_entropy = mse.cal_mse(eeg, 7500, 11)
             [hjorth_mobility, hjorth_complexity] = hjorth.hjorth(eeg)
             kc = kc_complexity.kc_complexity(eeg)
 
-            eeg_data.append([spectral_entropy, delta_ratio, beta_ratio, hjorth_mobility, theta_ratio, alpha_ratio,
-                             sample_entropy, multi_sample_entropy, kc])
+            eeg_data.append([spectral_entropy, delta_ratio, beta_ratio, theta_ratio, alpha_ratio,
+                             hjorth_mobility,
+                             sample_entropy,
+                             # multi_sample_entropy,
+                             kc])
 
             eeg_target.append(label)
             i+=1
             if i%30==0:
                 print(str(round(i/total*100))+"%")
-
 
     return eeg_data, eeg_target
 
@@ -69,10 +71,63 @@ def decision_tree(data, target):
     model = model.fit(x_train, y_train)
     score = model.score(x_test, y_test)
     print("model train end")
+    print("径向基 svm")
     print('准确率：', score)  # 计算测试集的度量值（准确率）
 
     with open("score.txt", "a+") as f:
         f.write(str(score) + "\n")
+
+
+
+    model = tree.DecisionTreeClassifier(criterion="gini")
+    # model = svm.SVC(kernel='linear')
+    # model = svm.SVC(kernel='poly', degree=3)
+    # model = svm.SVC(kernel='rbf', C=600)
+    # model = ensemble.RandomForestClassifier()
+    # model = MLPClassifier(solver='lbfgs',alpha=1e-5,hidden_layer_sizes=(5,2),random_state=1)
+    model = model.fit(x_train, y_train)
+    score = model.score(x_test, y_test)
+    print("model train end")
+    print("gini decision tree")
+    print('准确率：', score)  # 计算测试集的度量值（准确率）
+
+
+    with open("score.txt", "a+") as f:
+        f.write(str(score) + "\n")
+
+
+    # model = tree.DecisionTreeClassifier(criterion="gini")
+    # model = svm.SVC(kernel='linear')
+    # model = svm.SVC(kernel='poly', degree=3)
+    # model = svm.SVC(kernel='rbf', C=600)
+    model = ensemble.RandomForestClassifier()
+    # model = MLPClassifier(solver='lbfgs',alpha=1e-5,hidden_layer_sizes=(5,2),random_state=1)
+    model = model.fit(x_train, y_train)
+    score = model.score(x_test, y_test)
+    print("model train end")
+    print("random forest")
+    print('准确率：', score)  # 计算测试集的度量值（准确率）
+
+    with open("score.txt", "a+") as f:
+        f.write(str(score) + "\n")
+
+
+    # model = tree.DecisionTreeClassifier(criterion="gini")
+    # model = svm.SVC(kernel='linear')
+    # model = svm.SVC(kernel='poly', degree=3)
+    # model = svm.SVC(kernel='rbf', C=600)
+    # model = ensemble.RandomForestClassifier()
+    model = MLPClassifier(solver='lbfgs',alpha=1e-5,hidden_layer_sizes=(5,2),random_state=1)
+    model = model.fit(x_train, y_train)
+    score = model.score(x_test, y_test)
+    print("model train end")
+    print("ANN")
+    print('准确率：', score)  # 计算测试集的度量值（准确率）
+
+    with open("score.txt", "a+") as f:
+        f.write(str(score) + "\n")
+
+
 
     print("save model")
     save_tree("tree.pickle", model)
