@@ -44,7 +44,7 @@ def delta_analyse(data, fs, start_fr, end_fr):
 
 if __name__ == "__main__":
     data = data_load.load_data()
-    delta_analyse(data, 250, 1, 4)  # delta
-    delta_analyse(data, 250, 4, 8)  # theta
-    delta_analyse(data, 250, 8, 13)  # alpha
-    delta_analyse(data, 250, 13, 30)  # beta
+    delta_analyse(data, 100, 1, 4)  # delta
+    delta_analyse(data, 100, 4, 8)  # theta
+    delta_analyse(data, 100, 8, 13)  # alpha
+    delta_analyse(data, 100, 13, 30)  # beta

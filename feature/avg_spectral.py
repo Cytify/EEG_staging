@@ -42,4 +42,4 @@ def avg_spectral_analyse(data, fs):
 
 if __name__ == "__main__":
     data = data_load.load_data()
-    avg_spectral_analyse(data, 250)
+    avg_spectral_analyse(data, 100)

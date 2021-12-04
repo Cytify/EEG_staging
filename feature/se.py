@@ -1,5 +1,5 @@
-import numpy as np
 from preprocess import data_load
+import numpy as np
 
 
 def embed_seq(time_series, tau, embedding_dimension):
@@ -42,32 +42,29 @@ def samp_entropy(X, M, R):
     # Avoid taking log(0)
 
     Samp_En = np.log(np.sum(Cm + 1e-100) / np.sum(Cmp + 1e-100))
+    ed = time.time()
     return Samp_En
 
-# def sample_entropy(U, m, r):
-#     time_start = time.time()
-#
-#     def _maxdist(x_i, x_j):
-#         return max([abs(ua - va) for ua, va in zip(x_i, x_j)])
-#
-#     def _phi(m):
-#         x = [[U[j] for j in range(i, i + m - 1 + 1)] for i in range(N - m + 1)]
-#         B = [(len([1 for x_j in x if _maxdist(x_i, x_j) <= r]) - 1.0) / (N - m) for x_i in x]
-#         return (N - m + 1.0) ** (-1) * sum(B)
-#
-#     N = len(U)
-#
-#     res=-np.log(_phi(m + 1) / _phi(m))
-#     time_end = time.time()
-#     print('totally cost', time_end - time_start)
-#     print(res)
-#     return res
+
+def sample_entropy(U, m, r):
+
+    def _maxdist(x_i, x_j):
+        return max([abs(ua - va) for ua, va in zip(x_i, x_j)])
+
+    def _phi(m):
+        x = [[U[j] for j in range(i, i + m - 1 + 1)] for i in range(N - m + 1)]
+        B = [(len([1 for x_j in x if _maxdist(x_i, x_j) <= r]) - 1.0) / (N - m) for x_i in x]
+        return (N - m + 1.0) ** (-1) * sum(B)
+
+    N = len(U)
+
+    return -np.log(_phi(m + 1) / _phi(m))
 
 
 def cal_se(eeg, interval):
     i = 0
     group = []
-    while i < 7500:
+    while i < 3000:
         group.append(eeg[i:i + interval])
         i += interval
     se = [samp_entropy(seg, 2, 0.2 * np.std(seg, ddof=1)) for seg in group]
@@ -102,4 +99,4 @@ def se_analyse(data, interval):
 
 if __name__ == "__main__":
     data = data_load.load_data()
-    se_analyse(data, 1500)
+    se_analyse(data, 3000)

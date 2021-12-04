@@ -44,7 +44,7 @@ def hjorth(X, D=None):
         M4 += (D[i] - D[i - 1]) ** 2
     M4 = M4 / n
 
-    return np.sqrt(M2 / TP), np.sqrt(float(M4) * TP / M2 / M2)  # Hjorth Mobility and Complexity
+    return np.sqrt(M2 / TP) * 100, np.sqrt(float(M4) * TP / M2 / M2)  # Hjorth Mobility and Complexity
 
 
 def hjorth_analyse(data):
@@ -95,5 +95,4 @@ def hjorth_analyse(data):
 
 if __name__ == "__main__":
     data = data_load.load_data()
-    # t的选择有多种，可以分析，论文中提出，t最好在11与12之间
     hjorth_analyse(data)

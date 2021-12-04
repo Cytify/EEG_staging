@@ -34,4 +34,4 @@ def amp_diff_analyse(data, threshold):
 
 if __name__ == "__main__":
     data = data_load.load_data()
-    amp_diff_analyse(data, 0.02)
+    amp_diff_analyse(data, 20)
